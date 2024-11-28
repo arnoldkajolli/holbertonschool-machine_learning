@@ -6,7 +6,7 @@ def mat_mul(mat1, mat2):
         mat1: First matrix (2D list of ints/floats)
         mat2: Second matrix (2D list of ints/floats)
     Returns:
-        New matrix containing the product, or None if matrices can't be multiplied
+        Product matrix if possible, None otherwise
     """
     # Check if matrices can be multiplied
     if not mat1 or not mat2 or not mat1[0] or not mat2[0]:
