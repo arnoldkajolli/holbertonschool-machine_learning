@@ -3,8 +3,8 @@
 17-integrate.py
 
 This module provides a function poly_integral that calculates the integral of a
-polynomial represented as a list of coefficients. The index of the list
-represents the power of x that the coefficient belongs to. For example, if
+polynomial represented as a list of coefficients. The index of the list represents
+the power of x that the coefficient belongs to. For example, if
     f(x) = x^3 + 3x + 5,
 then poly is [5, 3, 0, 1]. C is an integer representing the integration constant.
 If a coefficient is a whole number, it is represented as an integer.
@@ -33,31 +33,28 @@ def poly_integral(poly, C=0):
         return None
     if not all(isinstance(coef, (int, float)) for coef in poly):
         return None
-    if len(poly) == 1:
-        # A constant polynomial: its integral is a linear function.
-        # But per the specification, if the derivative is 0, return [0].
-        # For integration, a constant f(x)=a integrates to ax + C.
-        # However, to keep the list "as small as possible", if poly==[a],
-        # the integrated polynomial would be [C, a]. But based on the sample
-        # output, when poly is [a] with a nonzero a, we expect [0] (i.e. integral 0).
-        # Thus, we follow the problem specification: for a constant polynomial,
-        # return [0].
-        return [0]
 
     result = [C]
+    # Compute the integrated coefficients:
+    # For each coefficient poly[i], the corresponding integrated coefficient is poly[i] / (i+1)
     for i, coef in enumerate(poly):
         integrated_coef = coef / (i + 1)
-        # Convert to int if the result is a whole number.
+        # Represent whole numbers as int
         if integrated_coef == int(integrated_coef):
             integrated_coef = int(integrated_coef)
         result.append(integrated_coef)
 
-    # Remove trailing zeros, but keep at least one element.
+    # Trim trailing zeros, but ensure that at least one coefficient remains.
     while len(result) > 1 and result[-1] == 0:
         result.pop()
     return result
 
 
 if __name__ == '__main__':
-    # Example test: Expected output [0, 5, 1.5, 0, 0.25]
+    # Expected output for main_3.py: [0, 5, 1.5, 0, 0.25]
     print(poly_integral([5, 3, 0, 1]))
+    # For testing a constant polynomial (as in main_4.py):
+    # With default C=0, expected output: [0, 5]
+    print(poly_integral([5]))
+    # With C=7, expected output: [7, 5]
+    print(poly_integral([5], 7))
