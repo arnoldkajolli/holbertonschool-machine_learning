@@ -17,13 +17,13 @@ def poly_derivative(poly):
     Calculates the derivative of a polynomial.
 
     Parameters:
-        poly (list): A list of coefficients representing a polynomial, where the
-            index corresponds to the power of x for that coefficient.
+        poly (list): A list of coefficients representing a polynomial.
+            The index corresponds to the power of x for that coefficient.
 
     Returns:
         list: A list of coefficients representing the derivative of the
-            polynomial. If the derivative is 0, returns [0]. If poly is not valid,
-            returns None.
+            polynomial. If the derivative is 0, returns [0]. If poly is not
+            valid, returns None.
     """
     if not isinstance(poly, list) or len(poly) == 0:
         return None
@@ -34,6 +34,7 @@ def poly_derivative(poly):
 
     derivative = [(i + 1) * poly[i + 1] for i in range(len(poly) - 1)]
     return derivative
+
 
 
 if __name__ == '__main__':
