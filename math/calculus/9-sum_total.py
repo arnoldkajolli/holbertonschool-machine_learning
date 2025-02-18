@@ -5,6 +5,7 @@ This module provides a function that calculates the sum of squares from 1 to n
 without using any loops.
 """
 
+
 def summation_i_squared(n):
     """
     Calculates the sum of squares from 1 to n.
@@ -24,6 +25,7 @@ def summation_i_squared(n):
     if not isinstance(n, int) or n < 1:
         return None
     return n * (n + 1) * (2 * n + 1) // 6
+
 
 if __name__ == '__main__':
     # Optional: quick test when running the module directly.
