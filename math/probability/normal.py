@@ -1,65 +1,100 @@
 #!/usr/bin/env python3
-"""Module for Poisson distribution class"""
+"""Module for Normal distribution class"""
 
 
-class Poisson:
-    """Class that represents a poisson distribution"""
+class Normal:
+    """Class that represents a normal distribution"""
 
-    def __init__(self, data=None, lambtha=1.):
+    def __init__(self, data=None, mean=0., stddev=1.):
         """
-        Initialize Poisson distribution
+        Initialize Normal distribution
         Args:
             data: list of data to estimate distribution
-            lambtha: expected number of occurrences
+            mean: mean of the distribution
+            stddev: standard deviation of the distribution
         """
         if data is None:
-            if lambtha <= 0:
-                raise ValueError("lambtha must be a positive value")
-            self.lambtha = float(lambtha)
+            if stddev <= 0:
+                raise ValueError("stddev must be a positive value")
+            self.mean = float(mean)
+            self.stddev = float(stddev)
         else:
             if not isinstance(data, list):
                 raise TypeError("data must be a list")
             if len(data) < 2:
                 raise ValueError("data must contain multiple values")
-            self.lambtha = float(sum(data) / len(data))
 
-    def pmf(self, k):
+            # Calculate mean
+            self.mean = float(sum(data) / len(data))
+
+            # Calculate standard deviation
+            squared_diff_sum = sum(
+                [(x - self.mean) ** 2 for x in data]
+            )
+            self.stddev = float((squared_diff_sum / len(data)) ** 0.5)
+
+    def z_score(self, x):
         """
-        Calculates the value of the PMF for a given number of successes
+        Calculates the z-score of a given x-value
         Args:
-            k: number of successes
+            x: x-value
         Returns:
-            PMF value for k
+            z-score of x
         """
-        if k < 0:
-            return 0
-        k = int(k)
-        
-        # Calculate k factorial
-        factorial = 1
-        for i in range(1, k + 1):
-            factorial *= i
-            
-        # Calculate PMF: (λ^k * e^(-λ)) / k!
+        return (x - self.mean) / self.stddev
+
+    def x_value(self, z):
+        """
+        Calculates the x-value of a given z-score
+        Args:
+            z: z-score
+        Returns:
+            x-value of z
+        """
+        return self.mean + (z * self.stddev)
+
+    def pdf(self, x):
+        """
+        Calculates the value of the PDF for a given x-value
+        Args:
+            x: x-value
+        Returns:
+            PDF value for x
+        """
+        pi = 3.1415926536
         e = 2.7182818285
-        numerator = (self.lambtha ** k) * (e ** -self.lambtha)
-        return numerator / factorial
+        exponent = -0.5 * ((x - self.mean) / self.stddev) ** 2
+        coefficient = 1 / (self.stddev * (2 * pi) ** 0.5)
+        return coefficient * (e ** exponent)
 
-    def cdf(self, k):
+    def cdf(self, x):
         """
-        Calculates the value of the CDF for a given number of successes
+        Calculates the value of the CDF for a given x-value
         Args:
-            k: number of successes
+            x: x-value
         Returns:
-            CDF value for k
+            CDF value for x
         """
-        if k < 0:
-            return 0
-        k = int(k)
+        z = (x - self.mean) / self.stddev
         
-        # Sum up PMF from 0 to k
-        cdf = 0
-        for i in range(k + 1):
-            cdf += self.pmf(i)
+        # Constants for approximation
+        b = [0.31938153, -0.356563782, 1.781477937,
+             -1.821255978, 1.330274429]
+        p = 0.2316419
+        
+        # Calculate absolute value of z
+        z_abs = abs(z)
+        t = 1.0 / (1.0 + p * z_abs)
+        
+        # Approximation formula
+        sum_term = t * (b[0] + t * (b[1] + t * (b[2] + t * (b[3] + t * b[4]))))
+        
+        # Get initial result
+        result = 1.0 - (1.0 / (2.0 * 3.1415926536) ** 0.5) * \
+                 (2.7182818285 ** (-0.5 * z_abs * z_abs)) * sum_term
+        
+        # Adjust if z is negative
+        if z < 0:
+            result = 1.0 - result
             
-        return cdf
+        return result
