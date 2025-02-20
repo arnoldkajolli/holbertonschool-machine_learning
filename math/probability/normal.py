@@ -24,14 +24,10 @@ class Normal:
             if len(data) < 2:
                 raise ValueError("data must contain multiple values")
 
-            # Calculate mean
             self.mean = float(sum(data) / len(data))
-
-            # Calculate standard deviation
-            squared_diff_sum = sum(
-                [(x - self.mean) ** 2 for x in data]
-            )
-            self.stddev = float((squared_diff_sum / len(data)) ** 0.5)
+            squared_diff_sum = sum((x - self.mean) ** 2 for x in data)
+            # Use (n - 1) in the denominator for the unbiased standard deviation
+            self.stddev = float((squared_diff_sum / (len(data) - 1)) ** 0.5)
 
     def z_score(self, x):
         """
@@ -51,7 +47,7 @@ class Normal:
         Returns:
             x-value of z
         """
-        return self.mean + (z * self.stddev)
+        return self.mean + z * self.stddev
 
     def pdf(self, x):
         """
@@ -76,25 +72,23 @@ class Normal:
             CDF value for x
         """
         z = (x - self.mean) / self.stddev
-        
-        # Constants for approximation
+        # Constants for the approximation
         b = [0.31938153, -0.356563782, 1.781477937,
              -1.821255978, 1.330274429]
         p = 0.2316419
-        
-        # Calculate absolute value of z
+
+        # Calculate the approximation based on |z|
         z_abs = abs(z)
         t = 1.0 / (1.0 + p * z_abs)
-        
-        # Approximation formula
-        sum_term = t * (b[0] + t * (b[1] + t * (b[2] + t * (b[3] + t * b[4]))))
-        
-        # Get initial result
-        result = 1.0 - (1.0 / (2.0 * 3.1415926536) ** 0.5) * \
-                 (2.7182818285 ** (-0.5 * z_abs * z_abs)) * sum_term
-        
-        # Adjust if z is negative
+        sum_term = t * (b[0] +
+                        t * (b[1] +
+                             t * (b[2] +
+                                  t * (b[3] +
+                                       t * b[4]))))
+        pdf_val = 1.0 / ((2 * 3.1415926536) ** 0.5) * (2.7182818285 ** (-0.5 * z_abs * z_abs))
+        result = 1.0 - pdf_val * sum_term
+
         if z < 0:
             result = 1.0 - result
-            
+
         return result
