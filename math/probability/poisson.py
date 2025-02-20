@@ -43,3 +43,22 @@ class Poisson:
         # Calculate e^(-λ) * λ^k / k!
         e = 2.7182818285  # Euler's number
         return (e ** -self.lambtha) * (self.lambtha ** k) / factorial
+
+    def cdf(self, k):
+        """
+        Calculates the value of the CDF for a given number of successes
+        Args:
+            k: number of successes
+        Returns:
+            CDF value for k
+        """
+        k = int(k)
+        if k < 0:
+            return 0
+
+        # Sum up PMF from 0 to k
+        cdf = 0
+        for i in range(k + 1):
+            cdf += self.pmf(i)
+
+        return cdf
