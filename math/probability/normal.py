@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 """Module for Normal distribution class"""
 
-import math
-
-
 class Normal:
     """Class that represents a normal distribution"""
 
@@ -21,13 +18,17 @@ class Normal:
             self.mean = float(mean)
             self.stddev = float(stddev)
         else:
-            if not isinstance(data, list):
+            if type(data) is not list:
                 raise TypeError("data must be a list")
             if len(data) < 2:
                 raise ValueError("data must contain multiple values")
             self.mean = float(sum(data) / len(data))
-            variance = sum((x - self.mean) ** 2 for x in data) / (len(data) - 1)
-            self.stddev = math.sqrt(variance)
+            # Use the unbiased estimator: divide by (n - 1)
+            variance = 0
+            for x in data:
+                variance += (x - self.mean) ** 2
+            variance = variance / (len(data) - 1)
+            self.stddev = variance ** 0.5
 
     def z_score(self, x):
         """
@@ -57,11 +58,11 @@ class Normal:
         Returns:
             PDF value for x
         """
-        pi = math.pi
-        e = math.e
-        exponent = -0.5 * ((x - self.mean) / self.stddev) ** 2
-        coefficient = 1 / (self.stddev * math.sqrt(2 * pi))
-        return coefficient * (e ** exponent)
+        PI = 3.1415926536
+        E = 2.7182818285
+        exponent = -0.5 * (((x - self.mean) / self.stddev) ** 2)
+        coefficient = 1 / (self.stddev * (2 * PI) ** 0.5)
+        return coefficient * (E ** exponent)
 
     def cdf(self, x):
         """
@@ -72,14 +73,16 @@ class Normal:
         Returns:
             CDF value for x
         """
+        PI = 3.1415926536
+        E = 2.7182818285
         z = (x - self.mean) / self.stddev
-        t = 1 / (1 + 0.2316419 * abs(z))
+        t = 1 / (1 + 0.2316419 * (abs(z)))
         poly = (0.31938153 * t -
                 0.356563782 * t ** 2 +
                 1.781477937 * t ** 3 -
                 1.821255978 * t ** 4 +
                 1.330274429 * t ** 5)
-        approx = (1 / math.sqrt(2 * math.pi)) * math.exp(-0.5 * z ** 2) * poly
+        approx = (1 / (2 * PI) ** 0.5) * (E ** (-0.5 * z ** 2)) * poly
         if z >= 0:
             cdf = 1 - approx
         else:
