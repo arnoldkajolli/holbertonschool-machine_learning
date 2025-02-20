@@ -23,3 +23,15 @@ class Exponential:
                 raise ValueError("data must contain multiple values")
             # For exponential distribution, lambtha is 1/mean
             self.lambtha = float(len(data) / sum(data))
+
+    def pdf(self, x):
+        """
+        Calculates the probability density function (PDF) for a given time period x.
+        Args:
+            x: time period
+        Returns:
+            The PDF value for x
+        """
+        if x < 0:
+            return 0
+        return self.lambtha * (2.7182818285 ** (-self.lambtha * x))
