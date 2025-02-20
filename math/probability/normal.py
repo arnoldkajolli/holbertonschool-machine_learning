@@ -63,11 +63,38 @@ class Normal:
         """
         pi = 3.1415926536
         e = 2.7182818285
-
-        # Calculate exponent term: -(x-μ)²/(2σ²)
         exponent = -0.5 * ((x - self.mean) / self.stddev) ** 2
-
-        # Calculate coefficient: 1/(σ√(2π))
         coefficient = 1 / (self.stddev * (2 * pi) ** 0.5)
-
         return coefficient * (e ** exponent)
+
+    def cdf(self, x):
+        """
+        Calculates the value of the CDF for a given x-value
+        Args:
+            x: x-value
+        Returns:
+            CDF value for x
+        """
+        z = (x - self.mean) / self.stddev
+        
+        # Constant used in approximation
+        b = [0.31938153, -0.356563782, 1.781477937,
+             -1.821255978, 1.330274429]
+        p = 0.2316419
+        
+        # Calculate absolute value of z
+        z_abs = abs(z)
+        t = 1.0 / (1.0 + p * z_abs)
+        
+        # Approximation formula
+        sum_term = t * (b[0] + t * (b[1] + t * (b[2] + t * (b[3] + t * b[4]))))
+        
+        # Get initial result
+        result = 1.0 - (1.0 / (2.0 * 3.1415926536) ** 0.5) * \
+                 (2.7182818285 ** (-0.5 * z_abs * z_abs)) * sum_term
+        
+        # Adjust if z is negative
+        if z < 0:
+            result = 1.0 - result
+            
+        return result
