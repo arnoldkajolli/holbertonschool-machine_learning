@@ -26,7 +26,7 @@ class Normal:
 
             self.mean = float(sum(data) / len(data))
             squared_diff_sum = sum((x - self.mean) ** 2 for x in data)
-            # Use (n - 1) in the denominator for the unbiased standard deviation
+            # Use the unbiased estimator: divide by (n - 1)
             self.stddev = float((squared_diff_sum / (len(data) - 1)) ** 0.5)
 
     def z_score(self, x):
@@ -85,6 +85,7 @@ class Normal:
                              t * (b[2] +
                                   t * (b[3] +
                                        t * b[4]))))
+        # Compute the standard normal PDF value
         pdf_val = 1.0 / ((2 * 3.1415926536) ** 0.5) * (2.7182818285 ** (-0.5 * z_abs * z_abs))
         result = 1.0 - pdf_val * sum_term
 
