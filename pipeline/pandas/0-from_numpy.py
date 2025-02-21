@@ -9,4 +9,3 @@ def from_numpy(array):
     c = array.shape[1]
     df = pd.DataFrame(array, columns=list(columns[:c]))
     return df
-
