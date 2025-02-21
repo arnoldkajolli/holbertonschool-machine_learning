@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-Module containing function for PCA.
+Performs PCA with specified variance retention
 """
-
 import numpy as np
 
 
@@ -12,23 +11,23 @@ def pca(X, var=0.95):
 
     Args:
         X: numpy.ndarray of shape (n, d) where:
-           - n is the number of data points,
-           - d is the number of dimensions,
-           - each feature is assumed to have zero mean.
-        var: fraction of the variance that the PCA transformation should maintain.
+            n is the number of data points
+            d is the number of dimensions in each point
+            all dimensions have a mean of 0 across all data points
+        var: fraction of the variance that the PCA transformation should maintain
 
     Returns:
         W: numpy.ndarray of shape (d, nd) where nd is the new dimensionality
-           (the number of principal components required to preserve at least var of the variance).
+           of the transformed X
     """
-    # Compute the singular value decomposition of the centered data
-    U, S, Vh = np.linalg.svd(X, full_matrices=False)
+    # Perform SVD on X
+    _, s, vh = np.linalg.svd(X)
 
-    # Compute the cumulative variance ratios
-    variance_ratios = np.cumsum(S ** 2) / np.sum(S ** 2)
+    # Calculate cumulative sum of explained variance ratios
+    explained_variance_ratio = np.cumsum(s ** 2) / np.sum(s ** 2)
 
-    # Find the minimal number of components needed to retain at least 'var' of the variance
-    k = np.where(variance_ratios >= var)[0][0] + 1
+    # Find number of components needed to maintain desired variance
+    n_components = np.argwhere(explained_variance_ratio >= var)[0, 0] + 1
 
-    # Return the weights matrix (principal components)
-    return Vh.T[:, :k]
+    # Return weights matrix (right singular vectors)
+    return vh.T[:, :n_components]
