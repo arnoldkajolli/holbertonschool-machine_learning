@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Performs PCA with specified variance retention
+Function that performs PCA on a dataset
 """
 import numpy as np
 
@@ -9,25 +9,36 @@ def pca(X, var=0.95):
     """
     Performs PCA on a dataset.
 
-    Args:
+    Parameters:
         X: numpy.ndarray of shape (n, d) where:
             n is the number of data points
             d is the number of dimensions in each point
-            all dimensions have a mean of 0 across all data points
         var: fraction of the variance that the PCA transformation should maintain
 
     Returns:
-        W: numpy.ndarray of shape (d, nd) where nd is the new dimensionality
-           of the transformed X
+        W: numpy.ndarray of shape (d, nd) where:
+            nd is the new dimensionality of the transformed X
     """
-    # Perform SVD on X
-    _, s, vh = np.linalg.svd(X)
+    # Calculate the covariance matrix
+    # We don't need to subtract mean as it's already done in the input
+    covariance = np.matmul(X.T, X) / X.shape[0]
 
-    # Calculate cumulative sum of explained variance ratios
-    explained_variance_ratio = np.cumsum(s ** 2) / np.sum(s ** 2)
+    # Calculate eigenvalues and eigenvectors
+    eigenvalues, eigenvectors = np.linalg.eigh(covariance)
+
+    # Sort eigenvalues and eigenvectors in descending order
+    idx = eigenvalues.argsort()[::-1]
+    eigenvalues = eigenvalues[idx]
+    eigenvectors = eigenvectors[:, idx]
+
+    # Calculate cumulative variance ratio
+    total_variance = np.sum(eigenvalues)
+    cumulative_variance_ratio = np.cumsum(eigenvalues) / total_variance
 
     # Find number of components needed to maintain desired variance
-    n_components = np.argwhere(explained_variance_ratio >= var)[0, 0] + 1
+    n_components = np.argmax(cumulative_variance_ratio >= var) + 1
 
-    # Return weights matrix (right singular vectors)
-    return vh.T[:, :n_components]
+    # Return the weight matrix W
+    W = eigenvectors[:, :n_components]
+
+    return W
