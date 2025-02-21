@@ -9,7 +9,6 @@ def maximization(X, g):
     """
     Calculates the maximization step in the EM algorithm for a GMM
     """
-    
     if not isinstance(X, np.ndarray) or len(X.shape) != 2:
         return None, None, None
     if not isinstance(g, np.ndarray) or len(g.shape) != 2:
