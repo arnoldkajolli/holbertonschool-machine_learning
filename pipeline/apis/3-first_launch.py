@@ -11,7 +11,6 @@ BASE_URL_ROCKET = "https://api.spacexdata.com/v4/rockets/"
 BASE_URL_LAUNCHPAD = "https://api.spacexdata.com/v4/launchpads/"
 
 
-
 def get_next_launch(api_response):
     """
     Script that displays the first launch
