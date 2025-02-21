@@ -19,26 +19,19 @@ def pca(X, var=0.95):
         W: numpy.ndarray of shape (d, nd) where:
             nd is the new dimensionality of the transformed X
     """
-    # Calculate the covariance matrix
-    # We don't need to subtract mean as it's already done in the input
-    covariance = np.matmul(X.T, X) / X.shape[0]
-
-    # Calculate eigenvalues and eigenvectors
-    eigenvalues, eigenvectors = np.linalg.eigh(covariance)
-
-    # Sort eigenvalues and eigenvectors in descending order
-    idx = eigenvalues.argsort()[::-1]
-    eigenvalues = eigenvalues[idx]
-    eigenvectors = eigenvectors[:, idx]
-
+    # Calculate SVD of centered data
+    U, S, Vh = np.linalg.svd(X, full_matrices=False)
+    
+    # Calculate variance ratios
+    variance_ratios = (S ** 2) / (S ** 2).sum()
+    
     # Calculate cumulative variance ratio
-    total_variance = np.sum(eigenvalues)
-    cumulative_variance_ratio = np.cumsum(eigenvalues) / total_variance
-
-    # Find number of components needed to maintain desired variance
+    cumulative_variance_ratio = np.cumsum(variance_ratios)
+    
+    # Find number of components needed
     n_components = np.argmax(cumulative_variance_ratio >= var) + 1
-
-    # Return the weight matrix W
-    W = eigenvectors[:, :n_components]
+    
+    # Return the weight matrix W (transpose of first n_components of Vh)
+    W = Vh[:n_components].T
 
     return W
