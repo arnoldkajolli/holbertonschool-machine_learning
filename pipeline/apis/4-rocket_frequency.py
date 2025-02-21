@@ -6,7 +6,6 @@ SpaceX API: script that displays the number of launches per rocket
 
 import requests
 
-
 BASE_LAUNCH_URL = 'https://api.spacexdata.com/v4/launches'
 BASE_ROCKET_URL = "https://api.spacexdata.com/v4/rockets/"
 
