@@ -7,52 +7,44 @@ import numpy as np
 
 def maximization(X, g):
     """
-    Performs the maximization step in the EM algorithm for a Gaussian Mixture Model.
-
-    Parameters:
-        X (numpy.ndarray): Data set of shape (n, d) where n is the number of samples
-                           and d is the number of features.
-        g (numpy.ndarray): Posterior probabilities of shape (k, n) where k is the number
-                           of clusters and n is the number of samples.
-
-    Returns:
-        pi (numpy.ndarray): Updated priors of shape (k,).
-        m (numpy.ndarray): Updated centroid means of shape (k, d).
-        S (numpy.ndarray): Updated covariance matrices of shape (k, d, d).
-
-        Returns (None, None, None) on failure.
+    Calculates the maximization step in the EM algorithm for a GMM
+    Args:
+        X: numpy.ndarray of shape (n, d) containing the data set
+        g: numpy.ndarray of shape (k, n) containing the posterior probabilities
+          for each data point in each cluster
+    Returns: pi, m, S, or None, None, None on failure
+        pi: numpy.ndarray of shape (k,) containing updated priors
+        m: numpy.ndarray of shape (k, d) containing updated centroid means
+        S: numpy.ndarray of shape (k, d, d) containing updated covariance matrices
     """
-    # Validate inputs
-    if not isinstance(X, np.ndarray) or X.ndim != 2:
+    if not isinstance(X, np.ndarray) or len(X.shape) != 2:
         return None, None, None
-    if not isinstance(g, np.ndarray) or g.ndim != 2:
+    if not isinstance(g, np.ndarray) or len(g.shape) != 2:
+        return None, None, None
+    if X.shape[0] != g.shape[1]:
         return None, None, None
 
     n, d = X.shape
-    k, n_g = g.shape
-    if n != n_g:
+    k = g.shape[0]
+
+    # Sum of posterior probabilities should be 1
+    if not np.isclose(np.sum(g, axis=0), np.ones(n)).all():
         return None, None, None
 
-    # Check that posterior probabilities for each sample sum to 1
-    if not np.allclose(np.sum(g, axis=0), 1):
+    try:
+        # Calculate new priors (pi)
+        pi = np.sum(g, axis=1) / n
+
+        # Calculate new means (m)
+        m = np.dot(g, X) / np.sum(g, axis=1).reshape(-1, 1)
+
+        # Calculate new covariance matrices (S)
+        S = np.zeros((k, d, d))
+        for i in range(k):
+            diff = X - m[i]
+            S[i] = np.dot((g[i].reshape(-1, 1) * diff).T, diff) / np.sum(g[i])
+
+        return pi, m, S
+
+    except Exception:
         return None, None, None
-
-    # Calculate the sum of posterior probabilities for each cluster
-    g_sum = np.sum(g, axis=1)  # Shape: (k,)
-    if np.any(g_sum == 0):
-        return None, None, None
-
-    # Compute updated priors (pi)
-    pi = g_sum / n
-
-    # Compute updated means (m)
-    m = np.dot(g, X) / g_sum[:, None]
-
-    # Compute updated covariance matrices (S) using a single loop over clusters
-    S = np.zeros((k, d, d))
-    for i in range(k):
-        diff = X - m[i]  # Shape: (n, d)
-        # Weight the differences by the posterior probabilities and compute the covariance
-        S[i] = np.dot((g[i][:, None] * diff).T, diff) / g_sum[i]
-
-    return pi, m, S
