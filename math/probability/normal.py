@@ -1,55 +1,46 @@
 #!/usr/bin/env python3
+"""Normal Class"""
 
-"""Module for Binomial distribution class"""
 
-class Binomial:
-    """Class that represents a binomial distribution"""
+pi = 3.1415926536
+e = 2.7182818285
 
-    def __init__(self, data=None, n=1, p=0.5):
-        """
-        Initialize Binomial distribution.
 
-        Args:
-            data: list of data to estimate distribution
-            n: number of Bernoulli trials
-            p: probability of a "success"
-
-        If data is not given:
-            Use the provided n and p.
-            - If n is not a positive value, raise a ValueError with the message
-              n must be a positive value
-            - If p is not a valid probability, raise a ValueError with the message
-              p must be greater than 0 and less than 1
-
-        If data is provided:
-            - If data is not a list, raise a TypeError with the message data must be a list
-            - If data does not contain at least two data points, raise a ValueError with the message
-              data must contain multiple values
-            - Calculate p first as:
-                p_initial = 1 - (variance / mean)
-              where variance is computed using the population formula (dividing by len(data))
-            - Calculate n as the rounded value of (mean / p_initial)
-            - Recalculate p as (mean / n)
-        """
+class Normal:
+    """Class Normal"""
+    def __init__(self, data=None, mean=0., stddev=1.):
+        """Class constructor"""
         if data is None:
-            if n <= 0:
-                raise ValueError("n must be a positive value")
-            if p <= 0 or p >= 1:
-                raise ValueError("p must be greater than 0 and less than 1")
-            self.n = int(n)
-            self.p = float(p)
+            if stddev <= 0:
+                raise ValueError("stddev must be a positive value")
+            self.stddev = float(stddev)
+            self.mean = float(mean)
         else:
-            if type(data) is not list:
+            if type(data) != list:
                 raise TypeError("data must be a list")
-            if len(data) < 2:
+            elif len(data) < 2:
                 raise ValueError("data must contain multiple values")
-            mean_data = sum(data) / len(data)
-            s = 0
+            self.mean = sum(data) / len(data)
+            self.stddev = 0
             for x in data:
-                s += (x - mean_data) ** 2
-            variance = s / len(data)
-            p_initial = 1 - (variance / mean_data)
-            n_calc = round(mean_data / p_initial)
-            p_calc = mean_data / n_calc
-            self.n = int(n_calc)
-            self.p = float(p_calc)
+                self.stddev += (x - self.mean) ** 2
+            self.stddev = (self.stddev / len(data)) ** (1/2)
+
+    def z_score(self, x):
+        """Calculates the z-score of a given x-value"""
+        return (x - self.mean) / self.stddev
+
+    def x_value(self, z):
+        """Calculates the x-value of a given z-score"""
+        return z * self.stddev + self.mean
+
+    def pdf(self, x):
+        """Calculates the PDF"""
+        return (1 / (self.stddev * (2 * pi) ** (1 / 2))) * e ** (-(1 / 2) * ((
+            x - self.mean) / self.stddev) ** 2)
+
+    def cdf(self, x):
+        """Calculates the CDF"""
+        y = (x - self.mean) / (self.stddev * 2 ** (1 / 2))
+        return 1 / 2 * (1 + (2 / pi ** (1 / 2) * (y - (y ** 3 / 3) + (
+            y ** 5 / 10) - (y ** 7 / 42) + (y ** 9 / 216))))

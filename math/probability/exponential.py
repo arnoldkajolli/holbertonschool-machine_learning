@@ -1,50 +1,33 @@
 #!/usr/bin/env python3
-"""Module for Exponential distribution class"""
+"""Exponential class"""
+
+
+e = 2.7182818285
 
 
 class Exponential:
-    """Class that represents an exponential distribution"""
-
+    """Class Exponential"""
     def __init__(self, data=None, lambtha=1.):
-        """
-        Initialize Exponential distribution
-        Args:
-            data: list of data to estimate distribution
-            lambtha: expected number of occurrences
-        """
+        """Class constructor"""
         if data is None:
             if lambtha <= 0:
                 raise ValueError("lambtha must be a positive value")
             self.lambtha = float(lambtha)
         else:
-            if not isinstance(data, list):
+            if type(data) != list:
                 raise TypeError("data must be a list")
-            if len(data) < 2:
+            elif len(data) < 2:
                 raise ValueError("data must contain multiple values")
-            self.lambtha = float(len(data) / sum(data))
+            self.lambtha = 1 / (sum(data)/len(data))
 
     def pdf(self, x):
-        """
-        Calculates the value of the PDF for a given time period
-        Args:
-            x: time period
-        Returns:
-            PDF value for x
-        """
+        """Calculates the PDF"""
         if x < 0:
             return 0
-        e = 2.7182818285  # Euler's number
-        return self.lambtha * (e ** (-self.lambtha * x))
+        return self.lambtha * e ** (-self.lambtha * x)
 
     def cdf(self, x):
-        """
-        Calculates the value of the CDF for a given time period
-        Args:
-            x: time period
-        Returns:
-            CDF value for x
-        """
+        """Calculates the CDF"""
         if x < 0:
             return 0
-        e = 2.7182818285  # Euler's number
-        return 1 - (e ** (-self.lambtha * x))
+        return 1 - e ** (-self.lambtha * x)
