@@ -11,7 +11,7 @@ def maximization(X, g):
     Args:
         X: numpy.ndarray of shape (n, d) containing the data set
         g: numpy.ndarray of shape (k, n) containing the posterior probabilities
-          for each data point in each cluster
+            for each data point in each cluster
     Returns: pi, m, S, or None, None, None on failure
         pi: numpy.ndarray of shape (k,) containing updated priors
         m: numpy.ndarray of shape (k, d) containing updated centroid means
