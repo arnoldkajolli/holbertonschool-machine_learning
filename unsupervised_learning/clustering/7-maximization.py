@@ -1,50 +1,50 @@
 #!/usr/bin/env python3
-"""
-Maximization step of the EM algorithm for GMM
-"""
 import numpy as np
-
 
 def maximization(X, g):
     """
-    Calculates the maximization step in the EM algorithm for a GMM
-    Args:
-        X: numpy.ndarray of shape (n, d) containing the data set
-        g: numpy.ndarray of shape (k, n) containing the posterior probabilities
-          for each data point in each cluster
-    Returns: pi, m, S, or None, None, None on failure
-        pi: numpy.ndarray of shape (k,) containing updated priors
-        m: numpy.ndarray of shape (k, d) containing updated centroid means
-        S: numpy.ndarray of shape (k, d, d) containing updated covariance matrices
+    Calculates the maximization step in the EM algorithm for a GMM.
+    
+    Parameters:
+    - X: numpy.ndarray of shape (n, d) containing the dataset.
+    - g: numpy.ndarray of shape (k, n) containing the posterior probabilities
+         for each data point for each cluster.
+    
+    Returns:
+    - pi: numpy.ndarray of shape (k,) containing the updated priors for each cluster.
+    - m: numpy.ndarray of shape (k, d) containing the updated centroid means for each cluster.
+    - S: numpy.ndarray of shape (k, d, d) containing the updated covariance matrices for each cluster.
+    If an error occurs, returns None, None, None.
+    
+    Note: At most one loop is used in the computation of the covariance matrices.
     """
-    if not isinstance(X, np.ndarray) or len(X.shape) != 2:
+    # Validate inputs
+    if not isinstance(X, np.ndarray) or not isinstance(g, np.ndarray):
         return None, None, None
-    if not isinstance(g, np.ndarray) or len(g.shape) != 2:
+    if X.ndim != 2 or g.ndim != 2:
         return None, None, None
-    if X.shape[0] != g.shape[1]:
-        return None, None, None
-
+    
     n, d = X.shape
-    k = g.shape[0]
-
-    # Sum of posterior probabilities should be 1
-    if not np.isclose(np.sum(g, axis=0), np.ones(n)).all():
+    k, n_g = g.shape
+    if n != n_g:
         return None, None, None
-
-    try:
-        # Calculate new priors (pi)
-        pi = np.sum(g, axis=1) / n
-
-        # Calculate new means (m)
-        m = np.dot(g, X) / np.sum(g, axis=1).reshape(-1, 1)
-
-        # Calculate new covariance matrices (S)
-        S = np.zeros((k, d, d))
-        for i in range(k):
-            diff = X - m[i]
-            S[i] = np.dot((g[i].reshape(-1, 1) * diff).T, diff) / np.sum(g[i])
-
-        return pi, m, S
-
-    except Exception:
+    
+    # Compute the sum of responsibilities for each cluster
+    g_sum = np.sum(g, axis=1)  # Shape: (k,)
+    if np.any(g_sum == 0):
         return None, None, None
+    
+    # Updated priors: pi_i = sum_j(g[i, j]) / n
+    pi = g_sum / n
+    
+    # Updated means: m_i = sum_j(g[i, j] * X[j]) / sum_j(g[i, j])
+    m = np.dot(g, X) / g_sum[:, None]
+    
+    # Updated covariance matrices: S_i = sum_j(g[i, j] * (X[j] - m_i) (X[j] - m_i)^T) / sum_j(g[i, j])
+    S = np.zeros((k, d, d))
+    for i in range(k):  # Allowed: one loop over clusters
+        diff = X - m[i]          # Shape: (n, d)
+        weighted_diff = diff * g[i, :][:, None]  # Weight each row by the corresponding posterior
+        S[i] = np.dot(weighted_diff.T, diff) / g_sum[i]
+    
+    return pi, m, S
